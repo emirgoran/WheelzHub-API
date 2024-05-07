@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:latest
+    container_name: mysql-wheelzhub
+    environment:
+      MYSQL_ROOT_PASSWORD: wheelzhub
+      MYSQL_DATABASE: wheelzhub
+      MYSQL_USER: wheelzhub
+      MYSQL_PASSWORD: wheelzhub
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  spring-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: spring-wheelzhub-api
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/wheelzhub?useSSL=false&serverTimezone=UTC
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
+      - SPRING_DATASOURCE_USERNAME=wheelzhub
+      - SPRING_DATASOURCE_PASSWORD=wheelzhub
+    depends_on:
+      - mysql-db
+
+volumes:
+  mysql-data:
