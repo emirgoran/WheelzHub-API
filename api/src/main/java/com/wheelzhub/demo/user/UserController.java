@@ -33,9 +33,7 @@ public class UserController {
 
     @PostMapping
     public UserDto createUser(@RequestBody UserDto userDto) {
-        System.out.println("UserDto = " + userDto);
         User savedUser = userService.createUser(userDto).toDatabaseEntity();
-        System.out.println("savedUser = " + savedUser.toDto());
         return savedUser.toDto();
     }
 

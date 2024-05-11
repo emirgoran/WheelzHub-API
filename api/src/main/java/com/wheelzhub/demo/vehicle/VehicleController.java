@@ -10,7 +10,7 @@ import java.util.List;
 // Returning the DTOs directly instead of wrapping them in ResponseEntity for code simplicity.
 // Not the best practice since, in addition to the DTO, the ResponseEntity returns HTTP status and (potentially) custom headers.
 
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH})
 @RestController
 @RequestMapping("/api/vehicles")
 public class VehicleController {
@@ -31,11 +31,16 @@ public class VehicleController {
         return vehicleService.getVehicleById(id);
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<VehicleDto> updateVehicle(@RequestBody VehicleDto vehicleDto) {
+
+        VehicleDto updatedVehicle = vehicleService.updateVehicle(vehicleDto);
+        return ResponseEntity.ok(updatedVehicle);
+    }
+
     @PostMapping
     public VehicleDto createVehicle(@RequestBody VehicleDto vehicleDto) {
-        System.out.println("vehicleDto = " + vehicleDto);
         Vehicle savedVehicle = vehicleService.createVehicle(vehicleDto).toDatabaseEntity();
-        System.out.println("savedVehicle = " + savedVehicle.toDto());
         return savedVehicle.toDto();
     }
 

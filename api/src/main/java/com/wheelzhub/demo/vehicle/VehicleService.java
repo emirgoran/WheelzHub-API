@@ -33,12 +33,22 @@ public class VehicleService {
 
     public VehicleDto createVehicle(VehicleDto vehicleDto) {
         Vehicle vehicle = vehicleDto.toDatabaseEntity();
+        vehicle.setId(0L);
 
         Vehicle savedVehicle = vehicleRepository.save(vehicle);
 
         vehicleDto.setId(savedVehicle.getId());
 
         return vehicleDto;
+    }
+
+    public VehicleDto updateVehicle(VehicleDto vehicleDto) {
+        vehicleRepository.findById(vehicleDto.getId())
+                .orElseThrow(() -> new VehicleNotFoundException("Vehicle with ID " + vehicleDto.getId() + " not found."));
+
+        Vehicle savedVehicle = vehicleRepository.save(vehicleDto.toDatabaseEntity());
+
+        return savedVehicle.toDto();
     }
 
     public VehicleDto getVehicleById(Long id) {

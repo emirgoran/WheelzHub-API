@@ -25,6 +25,7 @@ public class VehicleDto implements Dto {
     @Override
     public Vehicle toDatabaseEntity() {
         Vehicle vehicle = new Vehicle();
+        vehicle.setId(id);
         vehicle.setMake(make);
         vehicle.setModel(model);
         vehicle.setYear(year);
