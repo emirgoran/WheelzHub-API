@@ -19,6 +19,7 @@ public class User implements DatabaseEntity {
         UserDto userDto = new UserDto();
         userDto.setId(id);
         userDto.setUsername(username);
+        userDto.setPassword(password);
         return userDto;
     }
 }

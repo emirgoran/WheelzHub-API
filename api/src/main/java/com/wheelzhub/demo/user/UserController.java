@@ -10,7 +10,7 @@ import java.util.List;
 // Returning the DTOs directly instead of wrapping them in ResponseEntity for code simplicity.
 // Not the best practice since, in addition to the DTO, the ResponseEntity returns HTTP status and (potentially) custom headers.
 
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH})
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -35,6 +35,17 @@ public class UserController {
     public UserDto createUser(@RequestBody UserDto userDto) {
         User savedUser = userService.createUser(userDto).toDatabaseEntity();
         return savedUser.toDto();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto) {
+        UserDto updatedUser = userService.updateUser(userDto);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @PostMapping("/login")
+    public UserDto loginUser(@RequestBody UserDto userDto) {
+        return userService.loginUser(userDto);
     }
 
     @DeleteMapping("/{id}")

@@ -1,5 +1,8 @@
 package com.wheelzhub.demo.user;
 
+import com.wheelzhub.demo.vehicle.Vehicle;
+import com.wheelzhub.demo.vehicle.VehicleDto;
+import com.wheelzhub.demo.vehicle.VehicleNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -39,6 +42,15 @@ public class UserService {
         return userDto;
     }
 
+    public UserDto updateUser(UserDto userDto) {
+        userRepository.findById(userDto.getId())
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + userDto.getId() + " not found."));
+
+        User savedUser = userRepository.save(userDto.toDatabaseEntity());
+
+        return savedUser.toDto();
+    }
+
     public UserDto getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User with ID " + id + " not found."));
@@ -52,5 +64,12 @@ public class UserService {
             return true;
         }
         return false;
+    }
+
+    public UserDto loginUser(UserDto userDto) {
+        User user = userRepository.findUserByUsernameAndPassword(userDto.getUsername(), userDto.getPassword())
+                .orElseThrow(() -> new UserNotFoundException("User with username " + userDto.getUsername() + " not found."));
+
+        return user.toDto();
     }
 }
