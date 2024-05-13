@@ -7,9 +7,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-// Returning the DTOs directly instead of wrapping them in ResponseEntity for code simplicity.
-// Not the best practice since, in addition to the DTO, the ResponseEntity returns HTTP status and (potentially) custom headers.
-
 @CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH})
 @RestController
 @RequestMapping("/api/users")
@@ -21,46 +18,36 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping
-    public List<UserDto> getAllUsers() {
-        return userService.getAllUsers();
-    }
-
-    @GetMapping("/{id}")
-    public UserDto getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
-    }
-
     @PostMapping
-    public UserDto createUser(@RequestBody UserDto userDto) {
-        User savedUser = userService.createUser(userDto).toDatabaseEntity();
-        return savedUser.toDto();
-    }
-
-    @PatchMapping("/{id}")
-    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto) {
-        UserDto updatedUser = userService.updateUser(userDto);
-        return ResponseEntity.ok(updatedUser);
-    }
-
-    @PostMapping("/login")
-    public UserDto loginUser(@RequestBody UserDto userDto) {
-        return userService.loginUser(userDto);
+    public User createUser(@RequestBody User user) {
+        return userService.createUser(user);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        if (userService.deleteUserById(id)) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        userService.deleteUserById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/search")
-    public List<UserDto> searchUsers(
-            @RequestParam(required = false) String username
-    ) {
-        return userService.searchUsers(username);
+    @GetMapping
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable Long id) {
+        return userService.getUserById(id);
+    }
+
+    @PatchMapping("/{id}")
+    public User updateUser(@RequestBody User user) {
+        return userService.updateUser(user);
+    }
+
+    // Additional requests
+
+    @PostMapping("/login")
+    public User loginUser(@RequestBody User User) {
+        return userService.loginUser(User);
     }
 }

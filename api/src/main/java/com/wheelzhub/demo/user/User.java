@@ -1,12 +1,15 @@
 package com.wheelzhub.demo.user;
 
-import com.wheelzhub.demo.DatabaseEntity;
+import com.wheelzhub.demo.rent.Rent;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Data
-public class User implements DatabaseEntity {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,12 +17,16 @@ public class User implements DatabaseEntity {
     private String username;
     private String password;
 
-    @Override
-    public UserDto toDto() {
-        UserDto userDto = new UserDto();
-        userDto.setId(id);
-        userDto.setUsername(username);
-        userDto.setPassword(password);
-        return userDto;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Rent> rents = new ArrayList<>();
+
+    public void addRent(Rent rent) {
+        rents.add(rent);
+        rent.setUser(this);
+    }
+
+    public void removeRent(Rent rent) {
+        rents.remove(rent);
+        rent.setUser(null);
     }
 }

@@ -1,14 +1,11 @@
 package com.wheelzhub.demo.user;
 
-import com.wheelzhub.demo.vehicle.Vehicle;
-import com.wheelzhub.demo.vehicle.VehicleDto;
-import com.wheelzhub.demo.vehicle.VehicleNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -16,60 +13,53 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<UserDto> searchUsers(String username) {
-        Specification<User> spec = Specification
-                .where(UserSpecifications.hasUsername(username))
-                .and(UserSpecifications.hasUsername(username));
-
-        return userRepository.findAll(spec).stream().map(user -> user.toDto()).collect(Collectors.toList());
-    }
-
-    public List<UserDto> getAllUsers() {
-        return userRepository
-                .findAll()
-                .stream()
-                .map(user -> user.toDto())
-                .collect(Collectors.toList());
-    }
-
-    public UserDto createUser(UserDto userDto) {
-        User user = userDto.toDatabaseEntity();
+    public User createUser(User user) {
+        user.setId(0L); // Forces creation of a new user.
 
         User savedUser = userRepository.save(user);
 
-        userDto.setId(savedUser.getId());
-
-        return userDto;
+        return savedUser;
     }
 
-    public UserDto updateUser(UserDto userDto) {
-        userRepository.findById(userDto.getId())
-                .orElseThrow(() -> new UserNotFoundException("User with ID " + userDto.getId() + " not found."));
-
-        User savedUser = userRepository.save(userDto.toDatabaseEntity());
-
-        return savedUser.toDto();
-    }
-
-    public UserDto getUserById(Long id) {
+    public void deleteUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User with ID " + id + " not found."));
+                .orElseThrow(() -> new EntityNotFoundException("User with id " + id + " not found."));
 
-        return user.toDto();
+        userRepository.delete(user);
     }
 
-    public boolean deleteUserById(Long id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-            return true;
-        }
-        return false;
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
-    public UserDto loginUser(UserDto userDto) {
-        User user = userRepository.findUserByUsernameAndPassword(userDto.getUsername(), userDto.getPassword())
-                .orElseThrow(() -> new UserNotFoundException("User with username " + userDto.getUsername() + " not found."));
+    public User getUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User with ID " + id + " not found."));
 
-        return user.toDto();
+        return user;
+    }
+
+    public User updateUser(User user) {
+        userRepository.findById(user.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User with ID " + user.getId() + " not found."));
+
+        User savedUser = userRepository.save(user);
+
+        return savedUser;
+    }
+
+    // Additional requests
+
+    // Find all users that rented vehicle with vehicleId.
+    public List<User> getUsersByVehicleId(Long vehicleId) {
+        return userRepository.findAllUsersByVehicleId(vehicleId);
+    }
+
+    // Login user
+    public User loginUser(User loginUser) {
+        User user = userRepository.findUserByUsernameAndPassword(loginUser.getUsername(), loginUser.getPassword())
+                .orElseThrow(() -> new EntityNotFoundException("User with username " + loginUser.getUsername() + " not found."));
+
+        return user;
     }
 }

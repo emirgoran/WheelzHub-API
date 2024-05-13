@@ -1,15 +1,15 @@
 package com.wheelzhub.demo.vehicle;
 
-import com.wheelzhub.demo.DatabaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.wheelzhub.demo.rent.Rent;
+import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
-public class Vehicle implements DatabaseEntity {
+public class Vehicle {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,14 +19,16 @@ public class Vehicle implements DatabaseEntity {
     private int year;
     private String licensePlate;
 
-    @Override
-    public VehicleDto toDto() {
-        VehicleDto vehicleDto = new VehicleDto();
-        vehicleDto.setId(id);
-        vehicleDto.setMake(make);
-        vehicleDto.setModel(model);
-        vehicleDto.setYear(year);
-        vehicleDto.setLicensePlate(licensePlate);
-        return vehicleDto;
+    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Rent> rents = new ArrayList<>();
+
+    public void addRent(Rent rent) {
+        rents.add(rent);
+        rent.setVehicle(this);
+    }
+
+    public void removeRent(Rent rent) {
+        rents.remove(rent);
+        rent.setVehicle(null);
     }
 }

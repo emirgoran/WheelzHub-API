@@ -1,12 +1,12 @@
 package com.wheelzhub.demo.vehicle;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class VehicleService {
@@ -14,55 +14,45 @@ public class VehicleService {
     @Autowired
     private VehicleRepository vehicleRepository;
 
-    public List<VehicleDto> searchVehicles(String make, String model, String licensePlate) {
-        Specification<Vehicle> spec = Specification
-                .where(VehicleSpecifications.hasMake(make))
-                .and(VehicleSpecifications.hasModel(model))
-                .and(VehicleSpecifications.hasLicensePlate(licensePlate));
-
-        return vehicleRepository.findAll(spec).stream().map(vehicle -> vehicle.toDto()).collect(Collectors.toList());
+    public List<Vehicle> getAllVehicles() {
+        return new ArrayList<>(vehicleRepository.findAll());
     }
 
-    public List<VehicleDto> getAllVehicles() {
-        return vehicleRepository
-                .findAll()
-                .stream()
-                .map(vehicle -> vehicle.toDto())
-                .collect(Collectors.toList());
-    }
-
-    public VehicleDto createVehicle(VehicleDto vehicleDto) {
-        Vehicle vehicle = vehicleDto.toDatabaseEntity();
-        vehicle.setId(0L);
+    public Vehicle createVehicle(Vehicle vehicle) {
+        vehicle.setId(0L); // Forces creation of a new vehicle.
 
         Vehicle savedVehicle = vehicleRepository.save(vehicle);
 
-        vehicleDto.setId(savedVehicle.getId());
-
-        return vehicleDto;
+        return savedVehicle;
     }
 
-    public VehicleDto updateVehicle(VehicleDto vehicleDto) {
-        vehicleRepository.findById(vehicleDto.getId())
-                .orElseThrow(() -> new VehicleNotFoundException("Vehicle with ID " + vehicleDto.getId() + " not found."));
+    public Vehicle updateVehicle(Vehicle vehicle) {
+        vehicleRepository.findById(vehicle.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Vehicle with ID " + vehicle.getId() + " not found."));
 
-        Vehicle savedVehicle = vehicleRepository.save(vehicleDto.toDatabaseEntity());
+        Vehicle savedVehicle = vehicleRepository.save(vehicle);
 
-        return savedVehicle.toDto();
+        return savedVehicle;
     }
 
-    public VehicleDto getVehicleById(Long id) {
+    public Vehicle getVehicleById(Long id) {
         Vehicle vehicle = vehicleRepository.findById(id)
-                .orElseThrow(() -> new VehicleNotFoundException("Vehicle with ID " + id + " not found."));
+                .orElseThrow(() -> new EntityNotFoundException("Vehicle with ID " + id + " not found."));
 
-        return vehicle.toDto();
+        return vehicle;
     }
 
-    public boolean deleteVehicleById(Long id) {
-        if (vehicleRepository.existsById(id)) {
-            vehicleRepository.deleteById(id);
-            return true;
-        }
-        return false;
+    public void deleteVehicleById(Long id) {
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Vehicle with id " + id + " not found."));
+
+        vehicleRepository.delete(vehicle);
+    }
+
+    // Additional requests
+
+    // Find all vehicles that have been rented by user with userId.
+    public List<Vehicle> getVehiclesByUserId(Long userId) {
+        return vehicleRepository.findAllVehiclesByUserId(userId);
     }
 }
