@@ -1,9 +1,11 @@
 package com.wheelzhub.demo.vehicle;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wheelzhub.demo.rent.Rent;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +21,8 @@ public class Vehicle {
     private int year;
     private String licensePlate;
 
-    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Rent> rents = new ArrayList<>();
 
     public void addRent(Rent rent) {
@@ -30,5 +33,15 @@ public class Vehicle {
     public void removeRent(Rent rent) {
         rents.remove(rent);
         rent.setVehicle(null);
+    }
+
+    @JsonIgnore
+    @Transient  // This method does not correspond to a database column.
+    public Rent getActiveRent() {
+        LocalDateTime today = LocalDateTime.now();
+        return rents.stream()
+                .filter(rent -> !today.isBefore(rent.getStartDateTime()) && !today.isAfter(rent.getEndDateTime()))
+                .findFirst()
+                .orElse(null);
     }
 }

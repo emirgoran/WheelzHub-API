@@ -1,5 +1,6 @@
 package com.wheelzhub.demo.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wheelzhub.demo.rent.Rent;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -17,7 +18,8 @@ public class User {
     private String username;
     private String password;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Rent> rents = new ArrayList<>();
 
     public void addRent(Rent rent) {

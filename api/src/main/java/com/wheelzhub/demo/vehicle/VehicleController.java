@@ -45,4 +45,9 @@ public class VehicleController {
     }
 
     // Additional requests
+
+    @GetMapping("/withRentStatus")
+    public List<VehicleDTO> getAllVehiclesWithRentStatus() {
+        return vehicleService.getAllVehiclesWithRentStatus();
+    }
 }

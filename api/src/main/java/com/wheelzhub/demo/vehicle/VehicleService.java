@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class VehicleService {
@@ -54,5 +55,12 @@ public class VehicleService {
     // Find all vehicles that have been rented by user with userId.
     public List<Vehicle> getVehiclesByUserId(Long userId) {
         return vehicleRepository.findAllVehiclesByUserId(userId);
+    }
+
+    public List<VehicleDTO> getAllVehiclesWithRentStatus() {
+        List<Vehicle> vehicles = vehicleRepository.findAll();
+        return vehicles.stream()
+                .map(VehicleDTO::new)
+                .collect(Collectors.toList());
     }
 }
