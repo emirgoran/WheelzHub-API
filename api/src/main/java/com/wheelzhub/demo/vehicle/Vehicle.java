@@ -1,6 +1,7 @@
 package com.wheelzhub.demo.vehicle;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.wheelzhub.demo.image.Image;
 import com.wheelzhub.demo.rent.Rent;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -21,6 +22,11 @@ public class Vehicle {
     private int year;
     private String licensePlate;
 
+    @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn
+    @JsonIgnore
+    private List<Image> images = new ArrayList<>();
+
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Rent> rents = new ArrayList<>();
@@ -35,6 +41,16 @@ public class Vehicle {
         rent.setVehicle(null);
     }
 
+    public void addImage(Image image) {
+        images.add(image);
+        image.setVehicle(this);
+    }
+
+    public void removeImage(Image image) {
+        images.remove(image);
+        image.setVehicle(null);
+    }
+
     @JsonIgnore
     @Transient  // This method does not correspond to a database column.
     public Rent getActiveRent() {
@@ -43,5 +59,12 @@ public class Vehicle {
                 .filter(rent -> !today.isBefore(rent.getStartDateTime()) && !today.isAfter(rent.getEndDateTime()))
                 .findFirst()
                 .orElse(null);
+    }
+
+    @Transient  // This method does not correspond to a database column.
+    public long[] getPhotosIDs() {
+        return images.stream()
+                .mapToLong(Image::getId)
+                .toArray();
     }
 }

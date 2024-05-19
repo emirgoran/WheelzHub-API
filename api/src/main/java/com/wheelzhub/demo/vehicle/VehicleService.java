@@ -1,11 +1,12 @@
 package com.wheelzhub.demo.vehicle;
 
+import com.wheelzhub.demo.image.Image;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,5 +63,19 @@ public class VehicleService {
         return vehicles.stream()
                 .map(VehicleDTO::new)
                 .collect(Collectors.toList());
+    }
+
+    public void changeImageOrder(Long vehicleId, int oldIndex, int newIndex) {
+        Vehicle vehicle = vehicleRepository.findById(vehicleId).orElseThrow(() -> new IllegalArgumentException("Vehicle not found"));
+        List<Image> images = vehicle.getImages();
+
+        if (oldIndex < 0 || oldIndex >= images.size() || newIndex < 0 || newIndex >= images.size()) {
+            throw new IndexOutOfBoundsException("Invalid index");
+        }
+
+        Collections.swap(images, oldIndex, newIndex);
+
+        // Persist the changes
+        vehicleRepository.save(vehicle);
     }
 }
